@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Sage" />
+<meta name="theme-color" content="#f7f4ee" />
+<title>Sage</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon.png" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f4ee;
+    --bg-soft: #efeae0;
+    --ink: #2a2826;
+    --ink-soft: #6b6660;
+    --line: #d8d2c6;
+    --accent: #8b3a2b;
+    --serif: "Cormorant Garamond", Georgia, serif;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: calc(var(--safe-top) + 1.5rem) 1.5rem calc(var(--safe-bottom) + 1.5rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stage {
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .wordmark {
+    font-family: var(--serif);
+    font-size: 2rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    margin-bottom: 5rem;
+    font-style: italic;
+  }
+
+  .button-primary {
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    padding: 1.4rem 2.6rem;
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+    min-height: 48px;
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .button-primary:active { background: var(--accent); transform: scale(0.98); }
+
+  .prompt {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 2.5rem;
+    font-style: italic;
+  }
+
+  .choices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .choice {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 1.1rem 1.3rem;
+    font-family: var(--sans);
+    font-size: 1rem;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    border-radius: 2px;
+    min-height: 48px;
+  }
+
+  .choice:active { border-color: var(--ink); background: var(--bg-soft); }
+
+  .choice.muted { font-style: italic; color: var(--ink-soft); }
+
+  .fragment {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--ink);
+    text-align: left;
+    padding: 1rem 0 2rem;
+    white-space: pre-line;
+  }
+
+  .fragment em { font-style: italic; color: var(--accent); font-weight: 400; }
+
+  .fragment .small {
+    display: block;
+    font-size: 0.8rem;
+    font-family: var(--sans);
+    font-style: normal;
+    color: var(--ink-soft);
+    margin-top: 1.5rem;
+    letter-spacing: 0.04em;
+    line-height: 1.5;
+  }
+
+  .actions {
+    display: flex;
+    gap: 1.25rem;
+    justify-content: flex-start;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .action {
+    background: transparent;
+    border: none;
+    color: var(--ink-soft);
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 0.6rem 0;
+    transition: color 0.2s ease;
+    min-height: 44px;
+  }
+
+  .action:active { color: var(--accent); }
+
+  .body-question {
+    font-family: var(--serif);
+    font-size: 1.35rem;
+    font-style: italic;
+    color: var(--ink);
+    margin-bottom: 2rem;
+    line-height: 1.4;
+  }
+
+  .capture-block {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .capture-label {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-style: italic;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    text-align: left;
+  }
+
+  .capture-input {
+    width: 100%;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    padding: 1rem;
+    font-family: var(--sans);
+    font-size: 1rem;
+    color: var(--ink);
+    border-radius: 2px;
+    resize: vertical;
+    min-height: 80px;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  .capture-input:focus { border-color: var(--ink); }
+
+  .log {
+    position: fixed;
+    top: calc(var(--safe-top) + 1rem);
+    right: 1rem;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    padding: 0.45rem 0.9rem;
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s ease;
+    z-index: 10;
+    min-height: 36px;
+  }
+
+  .log:active { border-color: var(--ink); color: var(--ink); }
+
+  .status {
+    position: fixed;
+    top: calc(var(--safe-top) + 1.1rem);
+    left: 1rem;
+    font-family: var(--sans);
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    z-index: 10;
+  }
+
+  .status .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ink-soft);
+    margin-right: 0.4rem;
+    vertical-align: middle;
+  }
+
+  .status.online .dot { background: #4a8a3f; }
+
+  .log-view {
+    max-height: 65vh;
+    overflow-y: auto;
+    padding: 0.5rem 0;
+    text-align: left;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .log-entry { padding: 1.2rem 0; border-bottom: 1px solid var(--line); }
+  .log-entry:last-child { border-bottom: none; }
+
+  .log-date {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .log-path {
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+
+  .log-shift {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    font-style: italic;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  .empty {
+    text-align: center;
+    padding: 3rem 0;
+    color: var(--ink-soft);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  .login-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    padding: 1rem 0;
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    color: var(--ink);
+    margin-bottom: 2rem;
+    outline: none;
+    text-align: center;
+    transition: border-color 0.2s ease;
+    -webkit-appearance: none;
+  }
+
+  .login-input:focus { border-bottom-color: var(--ink); }
+  .login-input::placeholder { color: var(--ink-soft); font-style: italic; }
+
+  .login-message {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    margin-top: 2rem;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: calc(var(--safe-bottom) + 1.5rem);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--bg);
+    padding: 0.75rem 1.25rem;
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    font-weight: 300;
+    border-radius: 2px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  .toast.show { opacity: 1; }
+
+  .loading {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--ink-soft);
+    font-size: 1rem;
+    margin-top: 4rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="status" id="status"><span class="dot"></span><span id="statusText">offline</span></div>
+<button class="log" onclick="window.showLog()">Log</button>
+
+<div class="stage" id="stage"></div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import { CONFIG } from "./config.js";
+
+const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+
+// ---------- STATE ----------
+let state = {
+  view: "loading",
+  user: null,
+  routing: null,            // Loaded from Supabase
+  buckets_order: [],        // Loaded from Supabase
+  bucket: null,
+  sub: null,
+  source: null,
+  fragmentText: null,
+  body: { location: null, kind: null, step: 0 }
+};
+
+let captures = [];
+const stage = document.getElementById("stage");
+
+// ---------- AUTH ----------
+async function checkAuth() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    state.user = session.user;
+    await loadFromBackend();
+    setStatus(true);
+    state.view = "home";
+    render();
+  } else {
+    handleAuthRedirect();
+  }
+}
+
+async function handleAuthRedirect() {
+  const hash = window.location.hash;
+  if (hash && hash.includes("access_token")) {
+    const { data } = await supabase.auth.getUser();
+    if (data?.user) {
+      state.user = data.user;
+      await loadFromBackend();
+      setStatus(true);
+      state.view = "home";
+      window.history.replaceState({}, document.title, window.location.pathname);
+      render();
+      return;
+    }
+  }
+  state.view = "login";
+  render();
+}
+
+async function sendMagicLink(email) {
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.origin + window.location.pathname }
+  });
+  if (error) { toast("Could not send. Try again."); return false; }
+  return true;
+}
+
+async function signOut() {
+  await supabase.auth.signOut();
+  state.user = null;
+  state.view = "login";
+  setStatus(false);
+  render();
+}
+
+// ---------- BACKEND LOAD ----------
+async function loadFromBackend() {
+  try {
+    // Load routing data (uploaded by sync.py)
+    const { data: routingData } = await supabase
+      .from("sage_routing")
+      .select("data")
+      .eq("user_id", state.user.id)
+      .maybeSingle();
+
+    if (routingData?.data) {
+      state.routing = routingData.data.routing || {};
+      state.buckets_order = routingData.data.buckets_order || [];
+    } else {
+      // No routing yet — show empty state and tell user to run sync
+      state.routing = {};
+      state.buckets_order = [];
+    }
+
+    // Load captures
+    const { data: capData } = await supabase
+      .from("sage_captures")
+      .select("*")
+      .eq("user_id", state.user.id)
+      .order("created_at", { ascending: false });
+
+    captures = capData || [];
+  } catch (e) {
+    console.error("Backend load failed:", e);
+    state.routing = {};
+    state.buckets_order = [];
+  }
+}
+
+// ---------- CAPTURES ----------
+async function saveCaptureToBackend(capture) {
+  try {
+    const { data, error } = await supabase
+      .from("sage_captures")
+      .insert([{
+        user_id: state.user.id,
+        bucket: capture.bucket,
+        sub: capture.sub,
+        source: capture.source,
+        shift: capture.shift
+      }])
+      .select();
+
+    if (error) throw error;
+    if (data && data[0]) captures.unshift(data[0]);
+    return true;
+  } catch (e) {
+    console.error("Save failed:", e);
+    toast("Could not save.");
+    return false;
+  }
+}
+
+// ---------- UI HELPERS ----------
+function setStatus(online) {
+  const el = document.getElementById("status");
+  const txt = document.getElementById("statusText");
+  el.className = "status " + (online ? "online" : "offline");
+  txt.textContent = online ? "synced" : "offline";
+}
+
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2400);
+}
+
+// ---------- RENDER ----------
+function render() {
+  if (state.view === "loading") return renderLoading();
+  if (state.view === "login") return renderLogin();
+  if (state.view === "login_sent") return renderLoginSent();
+  if (state.view === "home") return renderHome();
+  if (state.view === "buckets") return renderBuckets();
+  if (state.view === "subs") return renderSubs();
+  if (state.view === "fragment") return renderFragment();
+  if (state.view === "dontknow") return renderDontKnow();
+  if (state.view === "log") return renderLog();
+  if (state.view === "empty_routing") return renderEmptyRouting();
+}
+
+function renderLoading() {
+  stage.innerHTML = `<div class="wordmark">Sage</div><div class="loading">Loading...</div>`;
+}
+
+function renderLogin() {
+  stage.innerHTML = `
+    <div class="wordmark">Sage</div>
+    <div class="prompt">What is your email.</div>
+    <input class="login-input" id="emailInput" type="email" placeholder="you@example.com" autocomplete="email" />
+    <button class="button-primary" id="loginBtn">Send link</button>
+  `;
+  document.getElementById("loginBtn").onclick = async () => {
+    const email = document.getElementById("emailInput").value.trim();
+    if (!email) return;
+    const ok = await sendMagicLink(email);
+    if (ok) { state.view = "login_sent"; render(); }
+  };
+}
+
+function renderLoginSent() {
+  stage.innerHTML = `
+    <div class="wordmark">Sage</div>
+    <div class="login-message">
+      A link is on the way to your email.<br/>
+      Tap it from this device to sign in.
+    </div>
+  `;
+}
+
+function renderHome() {
+  stage.innerHTML = `
+    <div class="wordmark">Sage</div>
+    <button class="button-primary" id="helpBtn">I want help</button>
+  `;
+  document.getElementById("helpBtn").onclick = goBuckets;
+}
+
+function renderEmptyRouting() {
+  stage.innerHTML = `
+    <div class="wordmark">Sage</div>
+    <div class="empty">
+      No routing data found.<br/>
+      Run <code style="font-family:var(--sans);background:var(--bg-soft);padding:0.2rem 0.5rem;border-radius:2px;">python3 sync.py</code> on your desktop to push your Sage files to the backend.
+    </div>
+    <div class="actions" style="justify-content:center;margin-top:2rem"><button class="action" id="backBtn">← Back</button></div>
+  `;
+  document.getElementById("backBtn").onclick = goHome;
+}
+
+function renderBuckets() {
+  if (!state.buckets_order || state.buckets_order.length === 0) {
+    state.view = "empty_routing";
+    render();
+    return;
+  }
+  const choices = state.buckets_order.map(b =>
+    `<button class="choice" data-bucket="${escapeHtml(b)}">${escapeHtml(b)}</button>`
+  ).join("");
+  stage.innerHTML = `
+    <div class="prompt">Where is it.</div>
+    <div class="choices">
+      ${choices}
+      <button class="choice muted" id="dkBtn">I don't know</button>
+    </div>
+    <div class="actions"><button class="action" id="backBtn">← Back</button></div>
+  `;
+  stage.querySelectorAll("[data-bucket]").forEach(b => {
+    b.onclick = () => pickBucket(b.dataset.bucket);
+  });
+  document.getElementById("dkBtn").onclick = goDontKnow;
+  document.getElementById("backBtn").onclick = goHome;
+}
+
+function renderSubs() {
+  const subs = Object.keys(state.routing[state.bucket] || {});
+  const choices = subs.map((s, i) =>
+    `<button class="choice" data-sub-idx="${i}">${escapeHtml(s)}</button>`
+  ).join("");
+  stage.innerHTML = `
+    <div class="prompt">${escapeHtml(state.bucket)}.</div>
+    <div class="choices">${choices}</div>
+    <div class="actions"><button class="action" id="backBtn">← Back</button></div>
+  `;
+  stage.querySelectorAll("[data-sub-idx]").forEach(b => {
+    b.onclick = () => pickSub(subs[parseInt(b.dataset.subIdx)]);
+  });
+  document.getElementById("backBtn").onclick = goBuckets;
+}
+
+function renderFragment() {
+  stage.innerHTML = `
+    <div class="fragment">${state.fragmentText}</div>
+    <div class="capture-block">
+      <div class="capture-label">When you are better — what shifted?</div>
+      <textarea class="capture-input" id="captureInput" placeholder="What eased it. One line."></textarea>
+      <div class="actions">
+        <button class="action" id="saveBtn">Save</button>
+        <button class="action" id="closeBtn">Close without saving</button>
+        <button class="action" id="anotherBtn">Another</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("saveBtn").onclick = saveCapture;
+  document.getElementById("closeBtn").onclick = goHome;
+  document.getElementById("anotherBtn").onclick = goBuckets;
+}
+
+function renderDontKnow() {
+  const step = state.body.step;
+  if (step === 0) {
+    stage.innerHTML = `
+      <div class="body-question">Where is it sitting.</div>
+      <div class="choices">
+        <button class="choice" data-loc="chest">Chest</button>
+        <button class="choice" data-loc="stomach">Stomach</button>
+        <button class="choice" data-loc="throat">Throat</button>
+        <button class="choice" data-loc="head">Head</button>
+        <button class="choice" data-loc="everywhere">Everywhere</button>
+        <button class="choice" data-loc="elsewhere">Somewhere else</button>
+      </div>
+      <div class="actions"><button class="action" id="backBtn">← Back</button></div>
+    `;
+    stage.querySelectorAll("[data-loc]").forEach(b => {
+      b.onclick = () => setBodyLocation(b.dataset.loc);
+    });
+    document.getElementById("backBtn").onclick = goBuckets;
+  } else if (step === 1) {
+    stage.innerHTML = `
+      <div class="body-question">Is the head spinning with thoughts, or pressure without thoughts.</div>
+      <div class="choices">
+        <button class="choice" data-kind="thoughts">Spinning with thoughts</button>
+        <button class="choice" data-kind="pressure">Pressure, no thoughts</button>
+        <button class="choice" data-kind="mixed">A bit of both</button>
+      </div>
+      <div class="actions"><button class="action" id="backBtn">← Back</button></div>
+    `;
+    stage.querySelectorAll("[data-kind]").forEach(b => {
+      b.onclick = () => setBodyKind(b.dataset.kind);
+    });
+    document.getElementById("backBtn").onclick = () => { state.body.step = 0; render(); };
+  } else if (step === 2) {
+    routeFromBody();
+  }
+}
+
+function renderLog() {
+  if (captures.length === 0) {
+    stage.innerHTML = `
+      <div class="prompt">Log.</div>
+      <div class="empty">No captures yet.<br/>What shifts will live here.</div>
+      <div class="actions" style="justify-content:center">
+        <button class="action" id="backBtn">← Back</button>
+        <button class="action" id="signoutBtn">Sign out</button>
+      </div>
+    `;
+  } else {
+    const entries = captures.map(c => {
+      const date = new Date(c.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+      return `
+        <div class="log-entry">
+          <div class="log-date">${date}</div>
+          <div class="log-path">${escapeHtml(c.bucket)} → ${escapeHtml(c.sub)}</div>
+          <div class="log-shift">${escapeHtml(c.shift)}</div>
+        </div>
+      `;
+    }).join("");
+    stage.innerHTML = `
+      <div class="prompt">Log.</div>
+      <div class="log-view">${entries}</div>
+      <div class="actions" style="justify-content:center">
+        <button class="action" id="backBtn">← Back</button>
+        <button class="action" id="exportBtn">Export</button>
+        <button class="action" id="signoutBtn">Sign out</button>
+      </div>
+    `;
+    document.getElementById("exportBtn").onclick = exportLog;
+  }
+  document.getElementById("backBtn").onclick = goHome;
+  document.getElementById("signoutBtn").onclick = signOut;
+}
+
+// ---------- NAVIGATION ----------
+function goHome() { state.view = "home"; resetBody(); render(); }
+function goBuckets() { state.view = "buckets"; resetBody(); render(); }
+function goDontKnow() { state.view = "dontknow"; state.body = { location: null, kind: null, step: 0 }; render(); }
+function resetBody() { state.body = { location: null, kind: null, step: 0 }; }
+
+function pickBucket(b) { state.bucket = b; state.view = "subs"; render(); }
+function pickSub(s) {
+  state.sub = s;
+  const frag = state.routing[state.bucket][s];
+  state.source = frag.source;
+  state.fragmentText = frag.text;
+  state.view = "fragment";
+  render();
+}
+
+function setBodyLocation(loc) { state.body.location = loc; state.body.step = 1; render(); }
+function setBodyKind(kind) { state.body.kind = kind; state.body.step = 2; render(); }
+
+function routeFromBody() {
+  const { kind } = state.body;
+  // Body-first rule. Pressure → Body/Restless. Thoughts → Mind/Chatter.
+  // The sync script is responsible for ensuring these sub-categories exist.
+  let bucket, sub;
+  if (kind === "thoughts" && state.routing["Mind"]) {
+    bucket = "Mind";
+    sub = Object.keys(state.routing["Mind"]).find(s => s.toLowerCase().includes("chatter") || s.toLowerCase().includes("spinning"));
+  } else if (state.routing["Body"]) {
+    bucket = "Body";
+    sub = Object.keys(state.routing["Body"]).find(s => s.toLowerCase().includes("restless") || s.toLowerCase().includes("noise"));
+  }
+
+  if (!bucket || !sub || !state.routing[bucket][sub]) {
+    toast("Could not route. Pick a bucket directly.");
+    goBuckets();
+    return;
+  }
+
+  state.bucket = bucket;
+  state.sub = sub;
+  const frag = state.routing[bucket][sub];
+  state.source = frag.source;
+  state.fragmentText = frag.text;
+  state.view = "fragment";
+  render();
+}
+
+async function saveCapture() {
+  const shift = document.getElementById("captureInput").value.trim();
+  if (!shift) { goHome(); return; }
+  const ok = await saveCaptureToBackend({
+    bucket: state.bucket,
+    sub: state.sub,
+    source: state.source,
+    shift
+  });
+  if (ok) toast("Saved.");
+  goHome();
+}
+
+function showLog() {
+  if (!state.user) return;
+  state.view = "log";
+  render();
+}
+
+function exportLog() {
+  const lines = captures.slice().reverse().map(c => {
+    const date = new Date(c.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    return `${date}\n${c.bucket} → ${c.sub}\n${c.shift}\n`;
+  }).join("\n---\n\n");
+  const blob = new Blob([lines], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `sage_captures_${new Date().toISOString().slice(0,10)}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function escapeHtml(s) {
+  if (!s) return "";
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+window.showLog = showLog;
+
+checkAuth();
+</script>
+</body>
+</html>
