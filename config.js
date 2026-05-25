@@ -6,6 +6,6 @@
 // ============================================================
 
 export const CONFIG = {
-  SUPABASE_URL: "YOUR_SUPABASE_URL_HERE",
-  SUPABASE_ANON_KEY: "YOUR_SUPABASE_ANON_KEY_HERE"
+  SUPABASE_URL: "https://mkbqhstobcllexyijklc.supabase.co",
+  SUPABASE_ANON_KEY: "sb_publishable_Nb96Gv3aGGYvvhZmyrqcfQ_Xz7Z_..."
 };
