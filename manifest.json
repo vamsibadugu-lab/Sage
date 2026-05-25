@@ -1,0 +1,17 @@
+{
+  "name": "Sage",
+  "short_name": "Sage",
+  "description": "Wisdom, on hand.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f4ee",
+  "theme_color": "#f7f4ee",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
